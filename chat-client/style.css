@@ -1,0 +1,62 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    max-width: 40em;
+    margin: 0 auto;
+    background-color: rgb(255, 241, 225);
+}
+
+.message_template {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    line-height: 1.5;
+}
+
+.message_content {
+    font-size: 30px;
+}
+
+.message_author {
+    font-size: 20px;
+}
+
+.username_wrap {
+    color: #686868;
+    font-style: italic;
+}
+
+#invalid_username {
+    color: red;
+}
+
+h1 {
+    font-size: 50px;
+    text-align: center;
+}
+
+#number_of_messages {
+    text-align: right;
+}
+
+#no_messages {
+    font-size: 23px;
+    text-align: center;
+}
+
+.loader_icon {
+    height: 25px;
+    width: auto;
+}
+
+.loading_block {
+    text-align: center;
+    font-size: 25px;
+}
+
+#log_in_message {
+    text-align: center;
+    font-size: 25px;
+}

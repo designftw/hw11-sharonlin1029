@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="module" src="./chat.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="app">
+    <p>
+      <button @click="$gf.toggleLogIn">
+        <!-- If we have a user ID, we're logged in so show "Log Out" -->
+        <!-- Otherwise, show "Log In" -->
+        {{ $gf.me? 'Log Out' : 'Log In' }}
+      </button>
+    </p>
+    <h1>
+      My Cool Chat App
+    </h1>
+
+    <hr>
+
+    <!-- If we're not logged in, hide everything except the login button -->
+    <div v-if="!$gf.me" id="log_in_message">
+      You are not logged in. Please log in to use the chat app.
+    </div>
+    <template v-if="$gf.me">
+
+        <!-- We display names in multiple places, so we made a -->
+        <!-- reusable <name></name> component. -->
+        <!-- See below for the template. -->
+        <!-- If there is an error, make an alert -->
+      <form @submit.prevent="requestUsername">
+        <label>
+          Request Username: <input type="text" name="username" v-model="requestedUsername" @input="event => validateUsername()">
+        </label>
+        <button type="submit" id="request_username_button" disabled>Submit</button>
+      </form>
+
+      <!-- Error message when username invalid -->
+      <div id="invalid_username"></div>
+
+      <div>
+        Username: @{{ myUsername }}
+      </div>
+
+      My Name Is: <name :actor="$gf.me" :editable="true"></name>
+      </p>
+
+      <p>
+        Change chat format:
+        <input type="radio" id="channel" :value="false" v-model="privateMessaging" />
+        <label for="channel">Channel-based public chat</label>
+
+        <!-- call search User if you click on private messaging tab -->
+        <input type="radio" id="pm" :value="true" v-model="privateMessaging" @click="searchUser()"/>
+        <label for="pm">Private Messaging</label>
+      </p>
+
+      <p v-if="!privateMessaging">
+        <label for="channel">
+          Change the channel you're chatting in:
+        </label>
+        <input id="channel" v-model="channel" />
+      </p>
+      <p v-else>
+        <label for="recipient">
+          Paste the username of who you'd like to chat with:
+        </label>
+
+        <input id="recipient" v-model="recipientUsername" @input="event => searchUser()"/>
+
+      </p>
+
+      <!-- A form for sending messages -->
+      <form @submit.prevent="sendMessage">
+        <!-- Send a message -->
+        <input v-model="messageText" placeholder="Type a message..." id="message_input"/>
+        <!-- Add an image -->
+        <input type="file" accept="image/png, image/jpeg"/ @change="onImageAttachment">
+        <input type="submit" value="Send" id="send_message" :disabled="privateMessaging"/>
+      </form>
+      <br>
+
+
+      <!-- Loading sign -->
+      <div id="loading_block" hidden>
+        <img src="loader.svg" class="loader_icon">
+        Loading messages...
+      </div>
+
+      <div id="number_of_messages">
+        {{ messages.length }} results shown!
+      </div>
+
+      <div v-if="messages.length == 0" id="no_messages">
+        <br>
+        No messages in this channel yet! Send something to get started!
+      </div>
+      
+      <br>
+
+
+      <!-- Print out Messages -->
+      <div v-for="message of messages" :key="message.id">
+        <form v-if="editID==message.id" @submit.prevent="saveEditMessage(message)">
+          <div class="message_template">
+            <input v-model="editText">
+            <input type="submit" value="Save" />
+          </div>
+          <br>
+        </form>
+
+        <div v-else>
+          <div class="message_template">
+            <span class="message_author">
+              <name :actor="message.actor" v-model="messageUserID"></name>
+            </span>
+
+            <span class="username_wrap">
+              @<span class="username">{{ findUsername(message.actor) }}</span>
+            </span>
+
+            
+            <template v-if="privateMessaging">
+              <span>
+                ➡️
+              </span>
+              <span class="message_author">
+                <name :actor="message.bto[0]"></name>
+              </span>
+
+              <span class="username_wrap">
+                @<span class="username">{{ findUsername(message.bto[0]) }}</span>
+              </span>
+            </template>
+
+            <div class="message_content">
+              Message: {{ message.content }}
+            </div>
+
+            
+            <div>
+              Published at Time: {{ message.published }}
+            </div>
+            <div>
+              Last Edited at Time: {{ message.updated }}
+            </div>
+
+            <template v-if="message.actor==$gf.me">
+              <button @click="removeMessage(message)">
+                Delete Message
+              </button>
+              <button @click="startEditMessage(message)">
+                Edit Message
+              </button>
+            </template>
+          </div>
+          <br>
+
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <template id="name">
+    <span v-if="!editing">
+
+      <!-- If we're not editing the name-->
+      <!-- Display the profile's name, if it exists -->
+      <!-- or anonymous if it doesn't -->
+      {{ profile? profile.name : 'Anonymous' }}
+
+      <!-- Also if the name is "editable" add an edit button -->
+      <button v-if="editable" @click="editName">
+        Edit Name
+      </button>
+    </span>
+
+    <!-- If we're in the editing state, create something to edit the name-->
+    <form v-else @submit.prevent="saveName">
+      <input v-model="editText" />
+      <input type="submit" value="Save Name" />
+    </form>
+  </template>
+</body>
+
+</html>
