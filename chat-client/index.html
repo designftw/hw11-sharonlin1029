@@ -27,13 +27,14 @@
     </div>
     <template v-if="$gf.me">
 
-        <!-- We display names in multiple places, so we made a -->
-        <!-- reusable <name></name> component. -->
-        <!-- See below for the template. -->
-        <!-- If there is an error, make an alert -->
+      <!-- We display names in multiple places, so we made a -->
+      <!-- reusable <name></name> component. -->
+      <!-- See below for the template. -->
+      <!-- If there is an error, make an alert -->
       <form @submit.prevent="requestUsername">
         <label>
-          Request Username: <input type="text" name="username" v-model="requestedUsername" @input="event => validateUsername()">
+          Request Username: <input type="text" name="username" v-model="requestedUsername"
+            @input="event => validateUsername()">
         </label>
         <button type="submit" id="request_username_button" disabled>Submit</button>
       </form>
@@ -45,7 +46,17 @@
         Username: @{{ myUsername }}
       </div>
 
-      My Name Is: <name :actor="$gf.me" :editable="true"></name>
+      <div>
+        My Name Is: <name :actor="$gf.me" :editable="true"></name>
+      </div>
+
+      <div>
+        Profile Picture:
+        <div>
+          <pfp :actor="$gf.me" :editable="true"></pfp>
+        </div>
+      </div>
+      <br>
       </p>
 
       <p>
@@ -54,7 +65,7 @@
         <label for="channel">Channel-based public chat</label>
 
         <!-- call search User if you click on private messaging tab -->
-        <input type="radio" id="pm" :value="true" v-model="privateMessaging" @click="searchUser()"/>
+        <input type="radio" id="pm" :value="true" v-model="privateMessaging" @click="searchUser()" />
         <label for="pm">Private Messaging</label>
       </p>
 
@@ -69,17 +80,17 @@
           Paste the username of who you'd like to chat with:
         </label>
 
-        <input id="recipient" v-model="recipientUsername" @input="event => searchUser()"/>
+        <input id="recipient" v-model="recipientUsername" @input="event => searchUser()" />
 
       </p>
 
       <!-- A form for sending messages -->
       <form @submit.prevent="sendMessage">
         <!-- Send a message -->
-        <input v-model="messageText" placeholder="Type a message..." id="message_input"/>
+        <input v-model="messageText" placeholder="Type a message..." id="message_input" />
         <!-- Add an image -->
-        <input type="file" accept="image/png, image/jpeg"/ @change="onImageAttachment">
-        <input type="submit" value="Send" id="send_message" :disabled="privateMessaging"/>
+        <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+        <input type="submit" value="Send" id="send_message" :disabled="privateMessaging" />
       </form>
       <br>
 
@@ -98,7 +109,7 @@
         <br>
         No messages in this channel yet! Send something to get started!
       </div>
-      
+
       <br>
 
 
@@ -113,16 +124,18 @@
         </form>
 
         <div v-else>
+
           <div class="message_template">
+
             <span class="message_author">
               <name :actor="message.actor" v-model="messageUserID"></name>
             </span>
 
             <span class="username_wrap">
-              @<span class="username">{{ findUsername(message.actor) }}</span>
+              @<span class="username">{{ actorsToUsernames[message.actor] }}</span>
             </span>
 
-            
+
             <template v-if="privateMessaging">
               <span>
                 ➡️
@@ -140,13 +153,43 @@
               Message: {{ message.content }}
             </div>
 
-            
+            <!-- NEW STUFF -->
+
+            <div v-if="message.attachment">
+              <template v-if="message.attachment.magnet in downloadedImages">
+                <img v-if="downloadedImages[message.attachment.magnet]"
+                  :src="downloadedImages[message.attachment.magnet]">
+                <span v-else>
+                  Image couldn't be downloaded!
+                </span>
+              </template>
+
+              <template v-else>
+                Loading image from {{ message.attachment.magnet }}
+                <img src="loader.svg" class="loader_icon">
+              </template>
+            </div>
+
             <div>
               Published at Time: {{ message.published }}
             </div>
             <div>
               Last Edited at Time: {{ message.updated }}
             </div>
+
+            <div>
+              <like :messageid="message.id"></like>
+            </div>
+
+            <div>
+              Read users: <read :messageid="message.id" :actorstousernames="actorsToUsernames" :myusername="myUsername">
+              </read>
+            </div>
+
+            <div>
+              Profile Picture: <pfp :actor="message.actor"></pfp>
+            </div>
+
 
             <template v-if="message.actor==$gf.me">
               <button @click="removeMessage(message)">
@@ -170,6 +213,8 @@
       <!-- If we're not editing the name-->
       <!-- Display the profile's name, if it exists -->
       <!-- or anonymous if it doesn't -->
+
+
       {{ profile? profile.name : 'Anonymous' }}
 
       <!-- Also if the name is "editable" add an edit button -->
@@ -184,6 +229,55 @@
       <input type="submit" value="Save Name" />
     </form>
   </template>
+
+  <template id="pfp">
+
+    <div v-if="profile">
+      {{ profile ? profile.icon.magnet : "No profile picture" }}
+
+      <!-- {{ downloadedProfilePictures }} -->
+      <!-- <div v-if="profile.icon">
+        <template v-if="profile.icon.magnet in downloadedProfilePictures">
+          <img v-if="downloadedProfilePictures[profile.icon.magnet]"
+            :src="downloadedProfilePictures[profile.icon.magnet]">
+          <span v-else>
+            Image couldn't be downloaded!
+          </span>
+        </template>
+      </div> -->
+    </div>
+    <span v-if="!editing">
+      <div>
+        <button v-if="editable" @click="editProfilePicture">
+          Edit Profile Picture
+        </button>
+      </div>
+
+
+      <!-- <img v-if="myProfilePictureURL.length !== 0" :src="myProfilePictureURL" id="profile_picture_element"> -->
+
+      <!-- <img v-else src="loader.svg" id="profile_picture_element"> -->
+
+    </span>
+
+    <form v-else @submit.prevent="saveProfilePicture()">
+      <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+      <input type="submit" value="Send" id="save_profile_picture" :disabled="privateMessaging" />
+    </form>
+  </template>
+
+
+  <template id="like">
+    <button @click="toggleLike" class="like_button">
+      {{ myLikes.length? '❤️' : '🖤' }}
+    </button>
+    {{ numLikes }} Likes
+  </template>
+
+  <template id="read">
+    {{ readUsers }}
+  </template>
+
 </body>
 
 </html>

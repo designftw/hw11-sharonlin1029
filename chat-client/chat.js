@@ -17,7 +17,7 @@ const app = {
 
   setup() {
     // Initialize the name of the channel we're chatting in
-    const channel = Vue.ref('default')
+    const channel = Vue.ref('sharon')
 
     // And a flag for whether or not we're private-messaging
     const privateMessaging = Vue.ref(false)
@@ -46,6 +46,38 @@ const app = {
       messageUserID: '',
       messagesLoaded: false,
       file: null,
+      downloadedImages: {},
+      imageURL: '',
+      actorsToUsernames: {},
+      profilePicture: '',
+    }
+  },
+
+  watch: {
+    async messages(messages) {
+      for (const m of messages) {
+        if (!(m.actor in this.actorsToUsernames)) {
+          this.actorsToUsernames[m.actor] = await this.resolver.actorToUsername(m.actor)
+        }
+        if (m.bto && m.bto.length && !(m.bto[0] in this.actorsToUsernames)) {
+          this.actorsToUsernames[m.bto[0]] = await this.resolver.actorToUsername(m.bto[0])
+        }
+      }
+    },
+
+    async messagesWithAttachments(messages) {
+      for (const m of messages) {
+        if (!(m.attachment.magnet in this.downloadedImages)) {
+          let blob
+          try {
+            blob = await this.$gf.media.fetch(m.attachment.magnet)
+          } catch {
+            this.downloadedImages[m.attachment.magnet] = false
+            continue
+          }
+          this.downloadedImages[m.attachment.magnet] = URL.createObjectURL(blob)
+        }
+      }
     }
   },
 
@@ -87,13 +119,35 @@ const app = {
         // Only show the 10 most recent ones
         .slice(0, 10)
     },
+
+    messagesWithAttachments() {
+      return this.messages.filter(m =>
+        m.attachment &&
+        m.attachment.type == 'Image' &&
+        typeof m.attachment.magnet == 'string')
+    },
+
+    // profileComponents() {
+    // }
   },
 
   methods: {
+    async getImageByMagnet(magnet) {
+      if (!(magnet in this.downloadedImages)) {
+        let blob
+        try {
+          blob = await this.$gf.media.fetch(magnet)
+        } catch {
+          this.downloadedImages[magnet] = false
+          return
+        }
+        this.downloadedImages[magnet] = URL.createObjectURL(blob)
+      }
+    },
+
     onImageAttachment(event) {
       const file = event.target.files[0]
       this.file = file;
-      console.log(file.name);
     },
     validateUsername() {
       if (this.requestedUsername == '') {
@@ -141,7 +195,7 @@ const app = {
     async requestUsername() {
       // if there is an error, don't change the name, else change 
       try {
-        if (await this.resolver.requestUsername(this.requestedUsername)){
+        if (await this.resolver.requestUsername(this.requestedUsername)) {
           // update the page with the new username
           let usernames = document.getElementsByClassName("username");
           for (let i = 0; i < usernames.length; i++) {
@@ -156,7 +210,7 @@ const app = {
       catch {
         document.getElementById("invalid_username").innerHTML = "Username already taken! Please choose another one!";
       }
-      
+
     },
 
 
@@ -175,10 +229,17 @@ const app = {
       }
     },
 
-    sendMessage() {
+    async sendMessage() {
       const message = {
         type: 'Note',
         content: this.messageText,
+      }
+
+      if (this.file !== null) {
+        message.attachment = {
+          type: 'Image',
+          magnet: await this.$gf.media.store(this.file)
+        }
       }
 
       // The context field declares which
@@ -195,6 +256,7 @@ const app = {
       // Send!
       this.$gf.post(message)
       this.messageText = '';
+      this.file = null;
     },
 
     removeMessage(message) {
@@ -250,7 +312,7 @@ const Name = {
   data() {
     return {
       editing: false,
-      editText: ''
+      editText: '',
     }
   },
 
@@ -283,7 +345,188 @@ const Name = {
   template: '#name'
 }
 
-app.components = { Name }
+const Pfp = {
+  props: ['actor', 'editable'],
+
+  setup(props) {
+    // Get a collection of all objects associated with the actor
+    const { actor } = Vue.toRefs(props)
+    const $gf = Vue.inject('graffiti')
+    return $gf.useObjects([actor])
+  },
+
+  data() {
+    return {
+      editing: false,
+      file: null,
+      myProfilePictureURL: "",
+      downloadedProfilePictures: {},
+    }
+  },
+
+  created() {
+    this.myProfilePictureURL = "";
+  },
+
+  watch: {
+    async profilePics(profile) {
+      for (const pro of profile) {
+        if (!(pro.icon.magnet in this.downloadedProfilePictures)) {
+          let blob;
+          try {
+            blob = await this.$gf.media.fetch(pro.icon.magnet)
+          } catch {
+            this.downloadedProfilePictures[pro.icon.magnet] = false
+            return
+          }
+          this.downloadedProfilePictures[pro.icon.magnet] = URL.createObjectURL(blob);
+        }
+      }
+    }
+  },
+
+  computed: {
+    profile() {
+      return this.objects.filter(
+        m =>
+          m.type &&
+          m.type == 'Profile' &&
+          m.icon &&
+          m.icon.type == 'Image' &&
+          m.icon.magnet &&
+          typeof m.icon.magnet == 'string'
+      ).reduce((prev, curr) => !prev || curr.published > prev.published ? curr : prev, null)
+    }
+  },
+
+  methods: {
+    editProfilePicture() {
+      this.editing = true
+    },
+
+    onImageAttachment(event) {
+      const file = event.target.files[0]
+      this.file = file;
+    },
+
+    async saveProfilePicture() {
+      let magnetLink = await this.$gf.media.store(this.file);
+      if (this.profile) {
+        this.profile.icon = {
+          type: 'Image',
+          magnet: magnetLink
+        }
+        this.myProfilePictureURL = URL.createObjectURL(this.file);
+        this.file = null;
+      }
+
+      else {
+        this.$gf.post({
+          type: 'Profile',
+          icon: {
+            type: 'Image',
+            magnet: magnetLink
+          }
+        })
+        this.myProfilePictureURL = URL.createObjectURL(this.file);
+        this.file = null;
+      }
+      this.editing = false
+    },
+  },
+
+  template: '#pfp'
+}
+
+const Like = {
+  props: ["messageid"],
+
+  setup(props) {
+    const $gf = Vue.inject('graffiti')
+    const messageid = Vue.toRef(props, 'messageid')
+    const { objects: likesRaw } = $gf.useObjects([messageid])
+    return { likesRaw }
+  },
+
+  computed: {
+    likes() {
+      return this.likesRaw.filter(l =>
+        l.type == 'Like' &&
+        l.object == this.messageid)
+    },
+
+    numLikes() {
+      // Unique number of actors
+      return [...new Set(this.likes.map(l => l.actor))].length
+    },
+
+    myLikes() {
+      return this.likes.filter(l => l.actor == this.$gf.me)
+    }
+  },
+
+  methods: {
+    toggleLike() {
+      if (this.myLikes.length) {
+        this.$gf.remove(...this.myLikes)
+      } else {
+        this.$gf.post({
+          type: 'Like',
+          object: this.messageid,
+          context: [this.messageid]
+        })
+      }
+    }
+  },
+
+  template: '#like'
+}
+
+const Read = {
+  props: ["messageid", "actorstousernames", "myusername"],
+
+  setup(props) {
+    const $gf = Vue.inject('graffiti')
+    const messageid = Vue.toRef(props, 'messageid')
+    const { objects: readRaw } = $gf.useObjects([messageid])
+    return { readRaw }
+  },
+
+  computed: {
+    reads() {
+      return this.readRaw.filter(l =>
+        l.type == 'Read' &&
+        l.object == this.messageid)
+    },
+
+    readUsers() {
+      try {
+        return [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
+      }
+      catch {
+        return "No one has read this message yet!";
+      }
+    },
+  },
+
+  methods: {
+
+  },
+
+  async created() {
+    if (!(this.myusername in this.readUsers)) {
+      this.$gf.post({
+        type: 'Read',
+        object: this.messageid,
+        context: [this.messageid]
+      })
+    }
+  },
+
+  template: '#read'
+}
+
+app.components = { Name, Like, Read, Pfp }
 Vue.createApp(app)
   .use(GraffitiPlugin(Vue))
   .mount('#app')
