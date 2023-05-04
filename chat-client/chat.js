@@ -372,25 +372,25 @@ const Pfp = {
     async profile(pro) {
       let profileid = pro.actor.substring(16, 24);
       // for (const pro of profile) {
-        console.log("profile: beginning", profileid)
+        // console.log("profile: beginning", profileid)
         if (!(pro.icon.magnet in this.downloadedpfps)) {
           this.downloadedpfps[pro.icon.magnet] = false;
-          console.log("profile: not in downloadedpfps", profileid)
+          // console.log("profile: not in downloadedpfps", profileid)
           let blob;
           try {
-            console.log("profile: fetching the blob", profileid)
+            // console.log("profile: fetching the blob", profileid)
             blob = await this.$gf.media.fetch(pro.icon.magnet)
           } catch {
-            console.log("profile: error fetching the blob", profileid)
-            // this.downloadedpfps[pro.icon.magnet] = false
+            // console.log("profile: error fetching the blob", profileid)
+            this.downloadedpfps[pro.icon.magnet] = false
             return
           }
-          console.log("profile: creating the URL", profileid)
-          console.log(blob);
+          // console.log("profile: creating the URL", profileid)
+          // console.log(blob);
           this.downloadedpfps[pro.icon.magnet] = URL.createObjectURL(blob);
-          console.log("profile: dictionary key is ", pro.icon.magnet);
-          console.log("profile: dictionary value is ", this.downloadedpfps[pro.icon.magnet])
-          console.log("profile: setting value in dictionary", profileid)
+          // console.log("profile: dictionary key is ", pro.icon.magnet);
+          // console.log("profile: dictionary value is ", this.downloadedpfps[pro.icon.magnet])
+          // console.log("profile: setting value in dictionary", profileid)
           return;
         }
       // }
