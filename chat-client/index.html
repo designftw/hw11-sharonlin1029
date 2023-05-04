@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
+
 <body>
   <div id="app">
     <p>
@@ -53,7 +54,7 @@
       <div>
         Profile Picture:
         <div>
-          <pfp :actor="$gf.me" :editable="true"></pfp>
+          <pfp :actor="$gf.me" :editable="true" :downloadedpfps="downloadedProfilePictures"></pfp>
         </div>
       </div>
       <br>
@@ -85,11 +86,11 @@
       </p>
 
       <!-- A form for sending messages -->
-      <form @submit.prevent="sendMessage">
+      <form @submit.prevent="sendMessage(); resetAttachedFile()">
         <!-- Send a message -->
         <input v-model="messageText" placeholder="Type a message..." id="message_input" />
         <!-- Add an image -->
-        <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+        <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment" id="attached_file">
         <input type="submit" value="Send" id="send_message" :disabled="privateMessaging" />
       </form>
       <br>
@@ -187,7 +188,7 @@
             </div>
 
             <div>
-              Profile Picture: <pfp :actor="message.actor"></pfp>
+              Profile Picture: <pfp :actor="message.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
             </div>
 
 
@@ -235,17 +236,13 @@
 
   <template id="pfp">
     <div v-if="profile">
-      <!-- {{ profile ? profile.icon.magnet : "No profile picture" }} -->
-
-      <!-- {{ downloadedProfilePictures }} -->
       <div v-if="profile.icon">
-        {{ downloadedProfilePictures }}
-        {{ profile.icon.magnet in downloadedProfilePictures }}
-        <template v-if="profile.icon.magnet in downloadedProfilePictures">
-          <img v-if="downloadedProfilePictures[profile.icon.magnet]"
-            :src="downloadedProfilePictures[profile.icon.magnet]" class="profile_picture">
+        <br>
+        <template v-if="profile.icon.magnet in downloadedpfps">
+          <img v-if="downloadedpfps[profile.icon.magnet]"
+            :src="downloadedpfps[profile.icon.magnet]" class="profile_picture">
           <span v-else>
-            Image couldn't be downloaded!
+            <img src="profile_icon.png" class="profile_picture">
           </span>
         </template>
       </div>
@@ -265,7 +262,7 @@
       </div>
     </span>
 
-    <form v-else @submit.prevent="saveProfilePicture()">
+    <form v-else @submit.prevent="saveProfilePicture();">
       <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
       <input type="submit" value="Save Profile Picture" id="save_profile_picture" :disabled="privateMessaging" />
       <button @click="cancelEditing()">Cancel</button>
