@@ -230,21 +230,32 @@
     </form>
   </template>
 
-  <template id="pfp">
 
+
+
+  <template id="pfp">
     <div v-if="profile">
-      {{ profile ? profile.icon.magnet : "No profile picture" }}
+      <!-- {{ profile ? profile.icon.magnet : "No profile picture" }} -->
 
       <!-- {{ downloadedProfilePictures }} -->
-      <!-- <div v-if="profile.icon">
+      <div v-if="profile.icon">
+        {{ downloadedProfilePictures }}
+        {{ profile.icon.magnet in downloadedProfilePictures }}
         <template v-if="profile.icon.magnet in downloadedProfilePictures">
           <img v-if="downloadedProfilePictures[profile.icon.magnet]"
-            :src="downloadedProfilePictures[profile.icon.magnet]">
+            :src="downloadedProfilePictures[profile.icon.magnet]" class="profile_picture">
           <span v-else>
             Image couldn't be downloaded!
           </span>
         </template>
-      </div> -->
+      </div>
+      <div v-else>
+        v-if = profile.icon
+      </div>
+    </div>
+
+    <div v-else>
+      No Profile Found
     </div>
     <span v-if="!editing">
       <div>
@@ -252,17 +263,12 @@
           Edit Profile Picture
         </button>
       </div>
-
-
-      <!-- <img v-if="myProfilePictureURL.length !== 0" :src="myProfilePictureURL" id="profile_picture_element"> -->
-
-      <!-- <img v-else src="loader.svg" id="profile_picture_element"> -->
-
     </span>
 
     <form v-else @submit.prevent="saveProfilePicture()">
       <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
-      <input type="submit" value="Send" id="save_profile_picture" :disabled="privateMessaging" />
+      <input type="submit" value="Save Profile Picture" id="save_profile_picture" :disabled="privateMessaging" />
+      <button @click="cancelEditing()">Cancel</button>
     </form>
   </template>
 

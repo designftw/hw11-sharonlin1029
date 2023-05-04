@@ -359,29 +359,24 @@ const Pfp = {
     return {
       editing: false,
       file: null,
-      myProfilePictureURL: "",
       downloadedProfilePictures: {},
     }
   },
 
-  created() {
-    this.myProfilePictureURL = "";
-  },
-
   watch: {
-    async profilePics(profile) {
-      for (const pro of profile) {
-        if (!(pro.icon.magnet in this.downloadedProfilePictures)) {
+    async profile(pro) {
+      // for (const pro of profile) {
+        // if (!(pro.icon.magnet in this.downloadedProfilePictures)) {
           let blob;
           try {
             blob = await this.$gf.media.fetch(pro.icon.magnet)
+            this.downloadedProfilePictures[pro.icon.magnet] = URL.createObjectURL(blob);
           } catch {
             this.downloadedProfilePictures[pro.icon.magnet] = false
-            return
+            // return
           }
-          this.downloadedProfilePictures[pro.icon.magnet] = URL.createObjectURL(blob);
-        }
-      }
+        // }
+      // }
     }
   },
 
@@ -400,8 +395,12 @@ const Pfp = {
   },
 
   methods: {
+    cancelEditing() {
+      this.editing = false;
+    },
+
     editProfilePicture() {
-      this.editing = true
+      this.editing = true;
     },
 
     onImageAttachment(event) {
@@ -411,26 +410,33 @@ const Pfp = {
 
     async saveProfilePicture() {
       let magnetLink = await this.$gf.media.store(this.file);
-      if (this.profile) {
-        this.profile.icon = {
+      this.$gf.post({
+        type: 'Profile',
+        icon: {
           type: 'Image',
           magnet: magnetLink
         }
-        this.myProfilePictureURL = URL.createObjectURL(this.file);
-        this.file = null;
-      }
+      })
+      // if (this.profile) {
+      //   this.profile.icon = {
+      //     type: 'Image',
+      //     magnet: magnetLink
+      //   }
+      //   // this.myProfilePictureURL = URL.createObjectURL(this.file);
+      //   this.file = null;
+      // }
 
-      else {
-        this.$gf.post({
-          type: 'Profile',
-          icon: {
-            type: 'Image',
-            magnet: magnetLink
-          }
-        })
-        this.myProfilePictureURL = URL.createObjectURL(this.file);
-        this.file = null;
-      }
+      // else {
+      //   this.$gf.post({
+      //     type: 'Profile',
+      //     icon: {
+      //       type: 'Image',
+      //       magnet: magnetLink
+      //     }
+      //   })
+      //   // this.myProfilePictureURL = URL.createObjectURL(this.file);
+      //   this.file = null;
+      // }
       this.editing = false
     },
   },
