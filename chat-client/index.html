@@ -154,6 +154,7 @@
         </form>
 
         <div v-else>
+
           <div class="message_template">
               <div v-if="!privateMessaging">
                 <div>
@@ -275,8 +276,13 @@
                 </div>
                 <br>
               </form>
+
               <div v-else>
                 <div class="reply_template">
+                  <div>
+                    <pfp :actor="reply.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
+                  </div>
+                  
                   <span class="message_author">
                     <name :actor="reply.actor" v-model="replyUserID"></name>
                   </span>
@@ -320,10 +326,6 @@
                     Read users: <read :messageid="reply.id" :actorstousernames="actorsToUsernames"
                       :myusername="myUsername">
                     </read>
-                  </div>
-
-                  <div>
-                    Profile Picture: <pfp :actor="reply.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
                   </div>
 
                   <template v-if="reply.actor==$gf.me">
