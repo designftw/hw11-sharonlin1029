@@ -51,6 +51,8 @@ const app = {
       actorsToUsernames: {},
       profilePicture: '',
       downloadedProfilePictures: {},
+      replying: false,
+      replyUserID: '',
     }
   },
 
@@ -94,9 +96,15 @@ const app = {
           // Is the value of that property 'Note'?
           m.type == 'Note' &&
           // Does the message have a content property?
-          m.content &&
-          // Is that property a string?
-          typeof m.content == 'string')
+          (
+            (m.content &&
+            // Is that property a string?
+              typeof m.content == 'string') || 
+                (m.attachment && 
+                  m.attachment.type == "Image")
+          ) &&
+          !m.inReplyTo
+        )
 
       // Do some more filtering for private messaging
       if (this.privateMessaging) {
@@ -133,6 +141,31 @@ const app = {
   },
 
   methods: {
+    messageReplies(message) {
+      let replies = this.messagesRaw.filter(
+        m =>
+          m.type &&
+          m.type == 'Note' &&
+          m.content &&
+          typeof m.content == 'string' &&
+          m.inReplyTo &&
+          m.inReplyTo == message.id
+      )
+
+      if (this.privateMessaging) {
+        replies = replies.filter(m =>
+          m.bto &&
+          m.bto.length == 1 &&
+          (
+            m.bto[0] == this.recipient ||
+            m.actor == this.recipient
+          ))
+      }
+      return replies
+        .sort((m1, m2) => new Date(m2.published) - new Date(m1.published))
+        .slice(0, 10)
+    },
+
     resetAttachedFile() {
       document.getElementById("attached_file").value = "";
     },
@@ -235,6 +268,7 @@ const app = {
     },
 
     async sendMessage() {
+      alert("Message Sent!");
       const message = {
         type: 'Note',
         content: this.messageText,
@@ -372,27 +406,27 @@ const Pfp = {
     async profile(pro) {
       let profileid = pro.actor.substring(16, 24);
       // for (const pro of profile) {
-        // console.log("profile: beginning", profileid)
-        if (!(pro.icon.magnet in this.downloadedpfps)) {
-          this.downloadedpfps[pro.icon.magnet] = false;
-          // console.log("profile: not in downloadedpfps", profileid)
-          let blob;
-          try {
-            // console.log("profile: fetching the blob", profileid)
-            blob = await this.$gf.media.fetch(pro.icon.magnet)
-          } catch {
-            // console.log("profile: error fetching the blob", profileid)
-            this.downloadedpfps[pro.icon.magnet] = false
-            return
-          }
-          // console.log("profile: creating the URL", profileid)
-          // console.log(blob);
-          this.downloadedpfps[pro.icon.magnet] = URL.createObjectURL(blob);
-          // console.log("profile: dictionary key is ", pro.icon.magnet);
-          // console.log("profile: dictionary value is ", this.downloadedpfps[pro.icon.magnet])
-          // console.log("profile: setting value in dictionary", profileid)
-          return;
+      // console.log("profile: beginning", profileid)
+      if (!(pro.icon.magnet in this.downloadedpfps)) {
+        this.downloadedpfps[pro.icon.magnet] = false;
+        // console.log("profile: not in downloadedpfps", profileid)
+        let blob;
+        try {
+          // console.log("profile: fetching the blob", profileid)
+          blob = await this.$gf.media.fetch(pro.icon.magnet)
+        } catch {
+          // console.log("profile: error fetching the blob", profileid)
+          this.downloadedpfps[pro.icon.magnet] = false
+          return
         }
+        // console.log("profile: creating the URL", profileid)
+        // console.log(blob);
+        this.downloadedpfps[pro.icon.magnet] = URL.createObjectURL(blob);
+        // console.log("profile: dictionary key is ", pro.icon.magnet);
+        // console.log("profile: dictionary value is ", this.downloadedpfps[pro.icon.magnet])
+        // console.log("profile: setting value in dictionary", profileid)
+        return;
+      }
       // }
     }
   },
@@ -549,7 +583,98 @@ const Read = {
   template: '#read'
 }
 
-app.components = { Name, Like, Read, Pfp }
+const Reply = {
+  props: ["messageid", "actorstousernames", "myusername", "recip", "channel", "privatemessage"],
+
+  setup(props) {
+    const $gf = Vue.inject('graffiti')
+    const messageid = Vue.toRef(props, 'messageid')
+    const { objects: repliesRaw } = $gf.useObjects([messageid])
+    return { repliesRaw }
+  },
+
+  data() {
+    return {
+      replyText: "",
+      file: null,
+      recipient: "",
+      editText: "",
+      editID: "",
+    }
+  },
+
+  computed: {
+    replies() {
+      return this.repliesRaw.filter(l =>
+        l.type &&
+        l.type == 'Note' &&
+        l.inReplyTo &&
+        l.inReplyTo == this.messageid &&
+        l.context.includes(this.messageid)) &&
+        (
+          (l.content &&
+            typeof l.content == 'string') || 
+              (l.attachment && 
+                l.attachment.type == "Image")
+        )
+    }
+  },
+
+  methods: {
+    onImageAttachment(event) {
+      const file = event.target.files[0]
+      this.file = file;
+    },
+
+    async sendReply() {
+      const reply = {
+        type: 'Note',
+        content: this.replyText,
+        inReplyTo: this.messageid,
+      }
+
+      if (this.file !== null) {
+        reply.attachment = {
+          type: 'Image',
+          magnet: await this.$gf.media.store(this.file)
+        }
+      }
+
+      if (this.privatemessage) {
+        reply.bto = [this.recip];
+        reply.context = [this.$gf.me, this.recip, this.messageid];
+      }
+      else {
+        reply.context = [this.channel, this.messageid];
+      }
+
+      console.log(reply);
+
+      this.$gf.post(reply);
+      this.replyText = "";
+      this.file = null;
+    },
+
+    removeReply(reply) {
+      this.$gf.remove(reply);
+    },
+
+    startEditReply(reply) {
+      this.editID = reply.id;
+      this.editText = reply.content;
+    },
+
+    saveEditReply(reply) {
+      reply.content = this.editText;
+      this.editID = "";
+      this.editText = "";
+    }
+  },
+
+  template: '#reply'
+}
+
+app.components = { Name, Like, Read, Pfp, Reply }
 Vue.createApp(app)
   .use(GraffitiPlugin(Vue))
   .mount('#app')

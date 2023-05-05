@@ -15,6 +15,14 @@ body {
     line-height: 1.5;
 }
 
+.reply_template {
+    background-color: rgb(183, 226, 226);
+    padding: 30px;
+    margin-top: 20px;
+    border-radius: 15px;
+    line-height: 1.5;
+}
+
 .message_content {
     font-size: 30px;
 }

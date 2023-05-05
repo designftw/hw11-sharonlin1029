@@ -179,6 +179,10 @@
             </div>
 
             <div>
+              <reply :messageid="message.id" :actorstousernames="actorsToUsernames" :myusername="myUsername" :recip="recipient" :channel="channel" :privatemessage="privateMessaging">
+            </div>
+
+            <div>
               <like :messageid="message.id"></like>
             </div>
 
@@ -200,11 +204,83 @@
                 Edit Message
               </button>
             </template>
+
+            <div v-for="reply of messageReplies(message)" :key="reply.id">
+              <form v-if="editID==reply.id" @submit.prevent="saveEditMessage(reply)">
+                <div class="reply_template">
+                  <input v-model="editText">
+                  <input type="submit" value="Save" />
+                </div>
+                <br>
+              </form>
+              <div v-else>
+                <div class="reply_template">
+                  <span class="message_author">
+                    <name :actor="reply.actor" v-model="replyUserID"></name>
+                  </span>
+  
+                  <span class="username_wrap">
+                    @<span class="username">{{ actorsToUsernames[reply.actor] }}</span>
+                  </span>
+  
+                  <div class="message_content">
+                    Reply: {{ reply.content }}
+                  </div>
+  
+                  <div v-if="reply.attachment">
+                    <template v-if="reply.attachment.magnet in downloadedImages">
+                      <img v-if="downloadedImages[reply.attachment.magnet]"
+                        :src="downloadedImages[reply.attachment.magnet]">
+                      <span v-else>
+                        Image couldn't be downloaded!
+                      </span>
+                    </template>
+      
+                    <template v-else>
+                      Loading image from {{ message.attachment.magnet }}
+                      <img src="loader.svg" class="loader_icon">
+                    </template>
+                  </div>
+  
+                  <div>
+                    Published at Time: {{ reply.published }}
+                  </div>
+                  <div>
+                    Last Edited at Time: {{ reply.updated }}
+                  </div>
+  
+                  <div>
+                    <like :messageid="reply.id"></like>
+                  </div>
+  
+                  <div>
+                    Read users: <read :messageid="reply.id" :actorstousernames="actorsToUsernames" :myusername="myUsername">
+                    </read>
+                  </div>
+  
+                  <div>
+                    Profile Picture: <pfp :actor="reply.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
+                  </div>
+  
+                  <template v-if="reply.actor==$gf.me">
+                    <button @click="removeMessage(reply)">
+                      Delete Reply
+                    </button>
+                    <button @click="startEditMessage(reply)">
+                      Edit Reply
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </div>
           </div>
           <br>
 
         </div>
       </div>
+
+      
+
     </template>
   </div>
 
@@ -279,6 +355,16 @@
 
   <template id="read">
     {{ readUsers }}
+  </template>
+
+
+  <template id="reply">
+    <form @submit.prevent="sendReply()">
+      <input v-model="replyText" placeholder="Type a reply..."/>
+      <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+      <input type="submit" value="Send" :disabled="privateMessaging"/> 
+      <!-- :disabled="privateMessaging" -->
+    </form>
   </template>
 
 </body>
