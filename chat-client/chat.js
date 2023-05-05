@@ -85,6 +85,48 @@ const app = {
   },
 
   computed: {
+    allMessages() {
+      let messages = this.messagesRaw
+        // Filter the "raw" messages for data
+        // that is appropriate for our application
+        // https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
+        .filter(m =>
+          // Does the message have a type property?
+          m.type &&
+          // Is the value of that property 'Note'?
+          m.type == 'Note' &&
+          // Does the message have a content property?
+          (
+            (m.content &&
+            // Is that property a string?
+              typeof m.content == 'string') || 
+                (m.attachment && 
+                  m.attachment.type == "Image")
+          )
+        )
+
+      // Do some more filtering for private messaging
+      if (this.privateMessaging) {
+        messages = messages.filter(m =>
+          // Is the message private?
+          m.bto &&
+          // Is the message to exactly one person?
+          m.bto.length == 1 &&
+          (
+            // Is the message to the recipient?
+            m.bto[0] == this.recipient ||
+            // Or is the message from the recipient?
+            m.actor == this.recipient
+          ))
+      }
+
+      return messages
+        // Sort the messages with the
+        // most recently created ones first
+        .sort((m1, m2) => new Date(m2.published) - new Date(m1.published))
+        // Only show the 10 most recent ones
+        .slice(0, 10)
+    },
     messages() {
       let messages = this.messagesRaw
         // Filter the "raw" messages for data
@@ -130,7 +172,7 @@ const app = {
     },
 
     messagesWithAttachments() {
-      return this.messages.filter(m =>
+      return this.allMessages.filter(m =>
         m.attachment &&
         m.attachment.type == 'Image' &&
         typeof m.attachment.magnet == 'string')
@@ -268,7 +310,6 @@ const app = {
     },
 
     async sendMessage() {
-      alert("Message Sent!");
       const message = {
         type: 'Note',
         content: this.messageText,
