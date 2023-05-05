@@ -4,20 +4,29 @@
 
 body {
     max-width: 40em;
-    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    margin-bottom: 30px;
     background-color: rgb(255, 241, 225);
 }
 
 .message_template {
     background-color: white;
-    padding: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     border-radius: 15px;
     line-height: 1.5;
 }
 
 .reply_template {
-    background-color: rgb(183, 226, 226);
-    padding: 30px;
+    background-color: rgb(235, 235, 235);
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     margin-top: 20px;
     border-radius: 15px;
     line-height: 1.5;
@@ -47,6 +56,8 @@ h1 {
 
 #number_of_messages {
     text-align: right;
+    color: #686868;
+    font-style: italic;
 }
 
 #no_messages {
@@ -69,6 +80,26 @@ h1 {
     font-size: 25px;
 }
 
+input::file-selector-button {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+}
+
+button {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+}
+
 img {
     max-width: 100%;
     height: auto;
@@ -76,7 +107,153 @@ img {
 
 .profile_picture {
     border-radius: 50%;
-    width: 50px;
+    width: 100px;
+    height: 100px;
+}
+
+
+#top_bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#profilepic {
+    /* right align items */
+    justify-self: end;
+}
+
+#user_info {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#my_profile_picture {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+}
+
+.settings_username {
+    font-size: 20px;
+    color: #686868;
+    font-style: italic;
+}
+
+
+#top_bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 300px;
+}
+
+#settings {
+    font-size: 40px;
+    float: right;
+    background-color: rgb(255, 241, 225);
+    border: none;
+}
+
+#channel_settings {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+#message_input {
+    width: 90%;
     height: 50px;
-    margin-right: 10px;
+    font-size: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.message_and_send {
+    display: grid;
+    grid-template-columns: 7fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pfp_and_name {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete_message {
+    background-color: rgb(255, 225, 225);
+}
+
+.edit_message {
+    background-color: rgb(249, 242, 209);
+}
+
+.reply_and_send {
+    display: grid;
+    grid-template-columns: 7fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.private_title {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sending_message {
+    width: 100%;
+    height: 100%;
+    font-size: 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background-color: rgb(255, 241, 225);
+    font-size: 50px;
+    padding: 0px;
+    margin: 0px;
+}
+
+#settings_editing_mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#editing_settings {
+    line-height: 2;
+}
+
+#reply_input {
+    width: 90%;
+    height: 50px;
+    font-size: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.send_reply {
+    width: 100%;
+    height: 100%;
+    font-size: 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background-color: white;
+    font-size: 50px;
+    padding: 0px;
+    margin: 0px;
 }

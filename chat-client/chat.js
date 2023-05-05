@@ -53,6 +53,7 @@ const app = {
       downloadedProfilePictures: {},
       replying: false,
       replyUserID: '',
+      editingSettings: false
     }
   },
 
@@ -177,12 +178,20 @@ const app = {
         m.attachment.type == 'Image' &&
         typeof m.attachment.magnet == 'string')
     },
-
-    // profileComponents() {
-    // }
   },
 
   methods: {
+    convertDate(date) {
+      // convert date to local time showing time first then date with no seconds
+      return new Date(date).toLocaleTimeString() + " on " + new Date(date).toLocaleDateString();
+
+    },
+    startEditingSettings() {
+      this.editingSettings = true;
+    },
+    stopEditingSettings() {
+      this.editingSettings = false;
+    },
     messageReplies(message) {
       let replies = this.messagesRaw.filter(
         m =>
