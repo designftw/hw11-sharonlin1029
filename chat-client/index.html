@@ -131,8 +131,23 @@
         Loading messages...
       </div>
 
-      <div id="number_of_messages">
-        {{ messages.length }} results shown!
+      <div class="save_thread_bar">
+        <div v-if="!savingThread">
+          <button @click="startThread()" class="start_thread_button">+ Create Saved Thread </button>
+          <button @click="accessSavedThreads()" class="access_saved_button">Saved Threads</button>
+        </div>
+
+        <div v-if="savingThread">
+          <input type="text" v-model="threadName" class="thread_name" placeholder="Thread Name">
+          <button @click="saveThread()">Save Thread</button>
+          <div> {{ threadMessages.length }} messages selected</div>
+          
+        </div>
+
+        <div id="number_of_messages">
+          {{ messages.length }} results shown!
+        </div>
+
       </div>
 
       <div v-if="messages.length == 0" id="no_messages">
@@ -192,7 +207,7 @@
                 </div>
 
                 <div style="font-size: 50px;">
-                  ➡️
+                  ➡
                 </div>
 
                 <div>
@@ -214,6 +229,10 @@
             <div class="message_content">
               Message: {{ message.content }}
             </div>
+
+            <!-- <div>
+              {{ message.id}}
+            </div> -->
 
             <!-- NEW STUFF -->
 

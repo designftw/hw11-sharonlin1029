@@ -53,7 +53,9 @@ const app = {
       downloadedProfilePictures: {},
       replying: false,
       replyUserID: '',
-      editingSettings: false
+      editingSettings: false,
+      savingThread: false,
+      threadMessages: [],
     }
   },
 
@@ -181,6 +183,18 @@ const app = {
   },
 
   methods: {
+    startThread() {
+      this.savingThread = true;
+    },
+    saveThread() {
+      this.savingThread = false;
+    },
+    accessSavedThreads() {
+      window.location.href = "saved_threads.html";
+    },
+    backToChat() {
+      window.location.href = "index.html";
+    },
     convertDate(date) {
       // convert date to local time showing time first then date with no seconds
       return new Date(date).toLocaleTimeString() + " on " + new Date(date).toLocaleDateString();
@@ -608,7 +622,8 @@ const Read = {
 
     readUsers() {
       try {
-        return [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
+        const userList =  [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
+        return userList;
       }
       catch {
         return "No one has read this message yet!";

@@ -2,6 +2,17 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+button {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
 body {
     max-width: 40em;
     margin-left: auto;
@@ -54,11 +65,6 @@ h1 {
     text-align: center;
 }
 
-#number_of_messages {
-    text-align: right;
-    color: #686868;
-    font-style: italic;
-}
 
 #no_messages {
     font-size: 23px;
@@ -90,15 +96,6 @@ input::file-selector-button {
     font-size: 15px;
 }
 
-button {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-size: 15px;
-}
 
 img {
     max-width: 100%;
@@ -107,8 +104,10 @@ img {
 
 .profile_picture {
     border-radius: 50%;
+    object-fit: cover;
     width: 100px;
     height: 100px;
+    border: 1px solid #ccc;
 }
 
 
@@ -206,7 +205,7 @@ img {
 .private_title {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    justify-content: space-between;
+    justify-items: center;
     align-items: center;
 }
 
@@ -221,6 +220,7 @@ img {
     font-size: 50px;
     padding: 0px;
     margin: 0px;
+    cursor: pointer;
 }
 
 #settings_editing_mode {
@@ -256,4 +256,50 @@ img {
     font-size: 50px;
     padding: 0px;
     margin: 0px;
+    cursor: pointer;
+}
+
+.save_thread_bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#number_of_messages {
+    text-align: right;
+    color: #686868;
+    font-style: italic;
+}
+
+#save_profile_picture {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.thread_name {
+    /* change width of the input box */
+    width: 60%;
+}
+
+input[type="text"] {
+    margin-right: 5px;
+    margin-bottom: 5px;
+    width: 50%;
+    font-size: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.start_thread_button {
+    margin-right: 5px;
 }
