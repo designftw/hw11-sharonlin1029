@@ -261,7 +261,7 @@ img {
 
 .save_thread_bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
 }
 
 #number_of_messages {
@@ -281,9 +281,9 @@ img {
     cursor: pointer;
 }
 
-.thread_name {
+#thread_name {
     /* change width of the input box */
-    width: 60%;
+    width: 45%;
 }
 
 input[type="text"] {
@@ -301,5 +301,9 @@ input[type="text"] {
 }
 
 .start_thread_button {
+    margin-right: 5px;
+}
+
+#save_thread_button {
     margin-right: 5px;
 }

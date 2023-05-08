@@ -138,9 +138,11 @@
         </div>
 
         <div v-if="savingThread">
-          <input type="text" v-model="threadName" class="thread_name" placeholder="Thread Name">
-          <button @click="saveThread()">Save Thread</button>
-          <div> {{ threadMessages.length }} messages selected</div>
+          <input type="text" v-model="threadName" id="thread_name" placeholder="Thread Name" @input="enableSaveThreadButton()">
+          <button @click="saveThread()" id="save_thread_button" disabled>Save Thread</button>
+          <button @click="cancelThread()">Cancel</button>
+          <div id="thread_error"></div>
+          <div> {{ selectedMessages.length }} messages selected</div>
           
         </div>
 
@@ -169,8 +171,10 @@
         </form>
 
         <div v-else>
-
           <div class="message_template">
+            <div>
+              <input v-if="savingThread" type="checkbox" @change="toggleSelect(message.id); enableSaveThreadButton()">
+            </div>
               <div v-if="!privateMessaging">
                 <div>
                   <pfp :actor="message.actor" :downloadedpfps="downloadedProfilePictures"></pfp>

@@ -54,8 +54,11 @@ const app = {
       replying: false,
       replyUserID: '',
       editingSettings: false,
+      // Saving thread
       savingThread: false,
-      threadMessages: [],
+      selectedMessages: [],
+      threadName: '',
+      savedThreads: {}
     }
   },
 
@@ -183,10 +186,36 @@ const app = {
   },
 
   methods: {
+    enableSaveThreadButton() {
+      if (this.selectedMessages.length > 0 && this.threadName.length > 0) {
+        document.getElementById("save_thread_button").disabled = false;
+      }
+      else {
+        document.getElementById("save_thread_button").disabled = true;
+      }
+    },
+    toggleSelect(messageID) {
+      if (this.selectedMessages.includes(messageID)) {
+        let index = this.selectedMessages.indexOf(messageID);
+        this.selectedMessages.splice(index, 1);
+      } else {
+        this.selectedMessages.push(messageID);
+      }
+    },
     startThread() {
       this.savingThread = true;
     },
     saveThread() {
+      this.savedThreads[this.threadName] = this.selectedMessages;
+      console.log(this.savedThreads);
+      this.selectedMessages = [];
+      this.threadName = '';
+      this.savingThread = false;
+      
+    },
+    cancelThread() {
+      this.selectedMessages = [];
+      this.threadName = '';
       this.savingThread = false;
     },
     accessSavedThreads() {
