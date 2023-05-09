@@ -110,13 +110,6 @@ const app = {
           !m.inReplyTo
         )
 
-      // check if all keywords are in message.content
-      messages = messages.filter(m => {
-        let content = m.content.toLowerCase() + " " + this.actorsToUsernames[m.actor].toLowerCase();
-        return content.match(regexPattern);
-
-        // m.content.toLowerCase().match(regexPattern))
-      });
 
       // Do some more filtering for private messaging
       if (this.privateMessaging) {
@@ -132,6 +125,15 @@ const app = {
             m.actor == this.recipient
           ))
       }
+
+      // check if all keywords are in message.content
+
+      messages = messages.filter(m => {
+        let content = (m.content).toLowerCase() + " " + (this.actorsToUsernames[m.actor] != undefined ? this.actorsToUsernames[m.actor]: "").toLowerCase();
+        return content.match(regexPattern);
+
+        // m.content.toLowerCase().match(regexPattern))
+      });
 
 
 
