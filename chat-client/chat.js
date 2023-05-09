@@ -136,8 +136,6 @@ const app = {
       });
 
 
-
-
       return messages
         // Sort the messages with the
         // most recently created ones first
