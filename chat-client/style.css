@@ -153,8 +153,8 @@ img {
 #settings {
     font-size: 40px;
     float: right;
-    background-color: rgb(217, 236, 231);
-    border: none;
+    border: 1px solid #ccc;
+    padding: 2px 8px;
 }
 
 #channel_settings {

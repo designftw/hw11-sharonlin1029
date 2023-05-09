@@ -142,7 +142,8 @@
           <button @click="saveThread()" id="save_thread_button" disabled>Save Thread</button>
           <button @click="cancelThread()">Cancel</button>
           <div id="thread_error"></div>
-          <div> {{ selectedMessages.length }} messages selected</div>
+          <div v-if="selectedMessages.length == 1"> {{ selectedMessages.length }} message selected</div>
+          <div v-else> {{ selectedMessages.length }} messages selected</div>
           
         </div>
 
