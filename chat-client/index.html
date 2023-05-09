@@ -82,16 +82,16 @@
 
         <p v-if="!privateMessaging">
           <label for="channel">
-            Change the channel you're chatting in:
+            Channel you're chatting in:
           </label>
-          <input id="channel" v-model="channel" />
+          <input type="text" id="channel" v-model="channel" />
         </p>
         <p v-else>
           <label for="recipient">
-            Paste the username of who you'd like to chat with:
+            User to chat with:
           </label>
 
-          <input id="recipient" v-model="recipientUsername" @input="event => searchUser()" />
+          <input type="text" id="recipient" v-model="recipientUsername" @input="event => searchUser()" />
         </p>
       </div>
 
@@ -146,10 +146,15 @@
           
         </div>
 
-        <div id="number_of_messages">
-          {{ messages.length }} results shown!
+        <div>
+          <input type="text" v-model="filter" id="filter_search" placeholder="Filter by Keywords">
         </div>
+        
 
+      </div>
+
+      <div id="number_of_messages">
+        {{ filteredMessages.length }} results shown!
       </div>
 
       <div v-if="messages.length == 0" id="no_messages">
@@ -161,7 +166,7 @@
 
 
       <!-- Print out Messages -->
-      <div v-for="message of messages" :key="message.id">
+      <div v-for="message of filteredMessages" :key="message.id">
         <form v-if="editID==message.id" @submit.prevent="saveEditMessage(message)">
           <div class="message_template">
             <input v-model="editText">
@@ -173,7 +178,7 @@
         <div v-else>
           <div class="message_template">
             <div>
-              <input v-if="savingThread" type="checkbox" @change="toggleSelect(message.id); enableSaveThreadButton()">
+              <input v-if="savingThread" type="checkbox" @change="toggleSelect(message); enableSaveThreadButton()">
             </div>
               <div v-if="!privateMessaging">
                 <div>
@@ -391,8 +396,8 @@
 
     <!-- If we're in the editing state, create something to edit the name-->
     <form v-else @submit.prevent="saveName">
-      <input v-model="editText" />
-      <input type="submit" value="Save Name" />
+      <input type="text" v-model="editText" />
+      <input type="submit" value="Save Name" id="save_name"/>
     </form>
   </template>
 

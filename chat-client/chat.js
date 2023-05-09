@@ -58,7 +58,9 @@ const app = {
       savingThread: false,
       selectedMessages: [],
       threadName: '',
-      savedThreads: {}
+      savedThreads: {},
+      // FILTERING
+      filter: '',
     }
   },
 
@@ -91,6 +93,71 @@ const app = {
   },
 
   computed: {
+    filteredMessages() {
+      let keywords = this.filter.toLowerCase().split(",").map(k => k.trim());
+      const regexPattern = "^" + keywords.map(s => `(?=.*?\\b${s}\\b)`).join("") + "";
+      let messages = this.messagesRaw
+        .filter(m =>
+          m.type &&
+          m.type == 'Note' &&
+          (
+            (m.content &&
+              // Is that property a string?
+              typeof m.content == 'string') ||
+            (m.attachment &&
+              m.attachment.type == "Image")
+          ) &&
+          !m.inReplyTo
+        )
+
+      // check if all keywords are in message.content
+      messages = messages.filter(m => {
+        let content = m.content.toLowerCase() + " " + this.actorsToUsernames[m.actor].toLowerCase();
+        return content.match(regexPattern);
+
+        // m.content.toLowerCase().match(regexPattern))
+      });
+
+      // Do some more filtering for private messaging
+      if (this.privateMessaging) {
+        messages = messages.filter(m =>
+          // Is the message private?
+          m.bto &&
+          // Is the message to exactly one person?
+          m.bto.length == 1 &&
+          (
+            // Is the message to the recipient?
+            m.bto[0] == this.recipient ||
+            // Or is the message from the recipient?
+            m.actor == this.recipient
+          ))
+      }
+
+      return messages
+        // Sort the messages with the
+        // most recently created ones first
+        .sort((m1, m2) => new Date(m2.published) - new Date(m1.published))
+        // Only show the 10 most recent ones
+        .slice(0, 20)
+    },
+    // savedMessages() {
+    //   let messages = this.messagesRaw
+    //     .filter(m =>
+    //       m.type &&
+    //       m.type == 'Note' &&
+    //       (
+    //         (m.content &&
+    //           // Is that property a string?
+    //           typeof m.content == 'string') ||
+    //         (m.attachment &&
+    //           m.attachment.type == "Image")
+    //       )
+    //     )
+    //   // check if message.context contains an element with the substring "Saved Thread: "
+    //   messages = messages.filter(m => m.context && m.context.some(c => c.includes("Saved Thread: ")));
+    //   return messages;
+      
+    // },
     allMessages() {
       let messages = this.messagesRaw
         // Filter the "raw" messages for data
@@ -104,10 +171,10 @@ const app = {
           // Does the message have a content property?
           (
             (m.content &&
-            // Is that property a string?
-              typeof m.content == 'string') || 
-                (m.attachment && 
-                  m.attachment.type == "Image")
+              // Is that property a string?
+              typeof m.content == 'string') ||
+            (m.attachment &&
+              m.attachment.type == "Image")
           )
         )
 
@@ -131,25 +198,19 @@ const app = {
         // most recently created ones first
         .sort((m1, m2) => new Date(m2.published) - new Date(m1.published))
         // Only show the 10 most recent ones
-        .slice(0, 10)
+        .slice(0, 20)
     },
     messages() {
       let messages = this.messagesRaw
-        // Filter the "raw" messages for data
-        // that is appropriate for our application
-        // https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
         .filter(m =>
-          // Does the message have a type property?
           m.type &&
-          // Is the value of that property 'Note'?
           m.type == 'Note' &&
-          // Does the message have a content property?
           (
             (m.content &&
-            // Is that property a string?
-              typeof m.content == 'string') || 
-                (m.attachment && 
-                  m.attachment.type == "Image")
+              // Is that property a string?
+              typeof m.content == 'string') ||
+            (m.attachment &&
+              m.attachment.type == "Image")
           ) &&
           !m.inReplyTo
         )
@@ -174,7 +235,7 @@ const app = {
         // most recently created ones first
         .sort((m1, m2) => new Date(m2.published) - new Date(m1.published))
         // Only show the 10 most recent ones
-        .slice(0, 10)
+        .slice(0, 20)
     },
 
     messagesWithAttachments() {
@@ -194,24 +255,30 @@ const app = {
         document.getElementById("save_thread_button").disabled = true;
       }
     },
-    toggleSelect(messageID) {
-      if (this.selectedMessages.includes(messageID)) {
-        let index = this.selectedMessages.indexOf(messageID);
+    toggleSelect(message) {
+      if (this.selectedMessages.includes(message)) {
+        let index = this.selectedMessages.indexOf(message);
         this.selectedMessages.splice(index, 1);
       } else {
-        this.selectedMessages.push(messageID);
+        this.selectedMessages.push(message);
       }
     },
     startThread() {
       this.savingThread = true;
     },
     saveThread() {
-      this.savedThreads[this.threadName] = this.selectedMessages;
-      console.log(this.savedThreads);
+      for (const message of this.selectedMessages) {
+        if (!message.savedThreads) {
+          message.savedThreads = [this.threadName];
+        } 
+        else {
+          message.savedThreads.push(this.threadName);
+        }
+      }
       this.selectedMessages = [];
       this.threadName = '';
       this.savingThread = false;
-      
+
     },
     cancelThread() {
       this.selectedMessages = [];
@@ -651,7 +718,7 @@ const Read = {
 
     readUsers() {
       try {
-        const userList =  [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
+        const userList = [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
         return userList;
       }
       catch {
@@ -707,9 +774,9 @@ const Reply = {
         l.context.includes(this.messageid)) &&
         (
           (l.content &&
-            typeof l.content == 'string') || 
-              (l.attachment && 
-                l.attachment.type == "Image")
+            typeof l.content == 'string') ||
+          (l.attachment &&
+            l.attachment.type == "Image")
         )
     }
   },

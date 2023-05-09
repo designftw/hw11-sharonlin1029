@@ -2,15 +2,126 @@
 <html>
 
 <head>
-    <script type="module" src="./chat.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <script type="module" src="./chat.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 
 <body>
-    <div id="app">
-        <div>
-            <button @click="backToChat()">Back to Chat</button>
-          </div>
+  <div id="app">
+    <div>
+      <button @click="backToChat()">Back to Chat</button>
     </div>
+
+    <h1>
+      Welcome, <name :actor="$gf.me"></name>!
+    </h1>
+
+    {{ savedThreads }}
+    <details>
+      <summary>
+        <div>
+          oof
+        </div>
+      </summary>
+    </details>
+    <div v-for="message of messages">
+      <!-- Message context: {{ message.context }} -->
+      Message: {{ message }}
+    </div>
+    <div v-for="(thread, messages) in savedThreads">
+
+    </div>
+    <hr>
+  </div>
+
+
+
+  <template id="name">
+    <span v-if="!editing">
+
+      <!-- If we're not editing the name-->
+      <!-- Display the profile's name, if it exists -->
+      <!-- or anonymous if it doesn't -->
+
+
+      {{ profile? profile.name : 'Anonymous' }}
+
+      <!-- Also if the name is "editable" add an edit button -->
+      <button v-if="editable" @click="editName">
+        Edit Name
+      </button>
+    </span>
+
+    <!-- If we're in the editing state, create something to edit the name-->
+    <form v-else @submit.prevent="saveName">
+      <input type="text" v-model="editText" />
+      <input type="submit" value="Save Name" id="save_name" />
+    </form>
+  </template>
+
+
+  <!-- TEMPLATES -->
+
+  <template id="pfp">
+    <div v-if="profile">
+      <div v-if="profile.icon">
+        <br>
+        <template v-if="profile.icon.magnet in downloadedpfps">
+          <img v-if="downloadedpfps[profile.icon.magnet]" :src="downloadedpfps[profile.icon.magnet]"
+            class="profile_picture">
+          <span v-else>
+            <img src="profile_icon.png" class="profile_picture">
+          </span>
+        </template>
+      </div>
+      <div v-else>
+        v-if = profile.icon
+      </div>
+    </div>
+
+    <div v-else>
+      No Profile Found
+    </div>
+    <div v-if="!editing">
+      <div>
+        <button v-if="editable" @click="editProfilePicture">
+          Edit Profile Picture
+        </button>
+      </div>
+    </div>
+
+    <form v-else @submit.prevent="saveProfilePicture();">
+      <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+      <input type="submit" value="Save Profile Picture" id="save_profile_picture" :disabled="privateMessaging" />
+      <button @click="cancelEditing()">Cancel</button>
+    </form>
+  </template>
+
+
+  <template id="like">
+    <button @click="toggleLike" class="like_button">
+      {{ myLikes.length? '❤️' : '🖤' }}
+    </button>
+    {{ numLikes }} Likes
+  </template>
+
+  <template id="read">
+    {{ readUsers }}
+  </template>
+
+
+  <template id="reply">
+    <form @submit.prevent="sendReply()">
+      <div class="reply_and_send">
+        <div>
+          <input v-model="replyText" placeholder="Type a reply..." id="reply_input" / class="message_input">
+        </div>
+        <input type="submit" value="➡️" :disabled="privateMessaging" class="send_reply" />
+        <input type="file" accept="image/png, image/jpeg" / @change="onImageAttachment">
+      </div>
+
+      <!-- :disabled="privateMessaging" -->
+    </form>
+  </template>
 </body>

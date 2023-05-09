@@ -19,7 +19,7 @@ body {
     margin-right: auto;
     margin-top: 30px;
     margin-bottom: 30px;
-    background-color: rgb(255, 241, 225);
+    background-color: rgb(217, 236, 231);
 }
 
 .message_template {
@@ -153,7 +153,7 @@ img {
 #settings {
     font-size: 40px;
     float: right;
-    background-color: rgb(255, 241, 225);
+    background-color: rgb(217, 236, 231);
     border: none;
 }
 
@@ -193,6 +193,7 @@ img {
 
 .edit_message {
     background-color: rgb(249, 242, 209);
+    margin-right: 5px;
 }
 
 .reply_and_send {
@@ -216,7 +217,7 @@ img {
     border-radius: 10px;
     border: none;
     outline: none;
-    background-color: rgb(255, 241, 225);
+    background-color: rgb(217, 236, 231);
     font-size: 50px;
     padding: 0px;
     margin: 0px;
@@ -268,6 +269,7 @@ img {
     text-align: right;
     color: #686868;
     font-style: italic;
+    margin-top: 10px;
 }
 
 #save_profile_picture {
@@ -289,7 +291,7 @@ img {
 input[type="text"] {
     margin-right: 5px;
     margin-bottom: 5px;
-    width: 50%;
+    width: 45%;
     font-size: 15px;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -306,4 +308,20 @@ input[type="text"] {
 
 #save_thread_button {
     margin-right: 5px;
+}
+
+#save_name {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+#filter_search {
+    width: 80%;
+    float: right;
 }
