@@ -105,11 +105,11 @@ const app = {
         let threadName = message.threadName;
         let threadMessage = message.threadMessage;
         if (!(threadName in threadDictionary)) {
-          threadDictionary[threadName] = new Set([threadMessage]);
+          threadDictionary[threadName] = [threadMessage];
         }
         else {
-          if (!threadDictionary[threadName].has(threadMessage)) {
-            threadDictionary[threadName].add(threadMessage);
+          if (!(threadDictionary[threadName].includes(threadMessage))) {
+            threadDictionary[threadName].push(threadMessage);
           }
         }
       }
