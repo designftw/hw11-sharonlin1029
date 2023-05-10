@@ -58,7 +58,6 @@ const app = {
       savingThread: false,
       selectedMessages: [],
       threadName: '',
-      savedThreads: {},
       // FILTERING
       filter: '',
     }
@@ -93,6 +92,30 @@ const app = {
   },
 
   computed: {
+    savedThreadsMessages() {
+      let threadDictionary = {};
+      let messages = this.messagesRaw
+        .filter(m =>
+          m.type &&
+          m.type == 'Note' &&
+          m.threadName &&
+          m.threadMessage
+        )
+      for (let message of messages) {
+        let threadName = message.threadName;
+        let threadMessage = message.threadMessage;
+        if (!(threadName in threadDictionary)) {
+          threadDictionary[threadName] = new Set([threadMessage]);
+        }
+        else {
+          if (!threadDictionary[threadName].has(threadMessage)) {
+            threadDictionary[threadName].add(threadMessage);
+          }
+        }
+      }
+      return threadDictionary;
+    },
+
     filteredMessages() {
       let keywords = this.filter.toLowerCase().split(",").map(k => k.trim());
       const regexPattern = "^" + keywords.map(s => `(?=.*?\\b${s}\\b)`).join("") + "";
@@ -108,6 +131,8 @@ const app = {
               m.attachment.type == "Image")
           ) &&
           !m.inReplyTo
+          && !m.threadName
+          && !m.threadMessage
         )
 
 
@@ -143,22 +168,6 @@ const app = {
         // Only show the 10 most recent ones
         .slice(0, 20)
     },
-    // savedMessages() {
-    //   let messages = this.messagesRaw
-    //     .filter(m =>
-    //       m.type &&
-    //       m.type == 'Note' &&
-    //       (
-    //         (m.content &&
-    //           // Is that property a string?
-    //           typeof m.content == 'string') ||
-    //         (m.attachment &&
-    //           m.attachment.type == "Image")
-    //       )
-    //     )
-    //   // check if message.context contains an element with the substring "Saved Thread: "
-    //   messages = messages.filter(m => m.context && m.context.some(c => c.includes("Saved Thread: ")));
-    //   return messages;
       
     // },
     allMessages() {
@@ -170,15 +179,17 @@ const app = {
           // Does the message have a type property?
           m.type &&
           // Is the value of that property 'Note'?
-          m.type == 'Note' &&
+          m.type == 'Note'
           // Does the message have a content property?
-          (
+          && (
             (m.content &&
               // Is that property a string?
               typeof m.content == 'string') ||
             (m.attachment &&
               m.attachment.type == "Image")
           )
+          // && !m.threadName
+          // && !m.threadMessage
         )
 
       // Do some more filtering for private messaging
@@ -216,6 +227,8 @@ const app = {
               m.attachment.type == "Image")
           ) &&
           !m.inReplyTo
+          && !m.threadName
+          && !m.threadMessage
         )
 
       // Do some more filtering for private messaging
@@ -270,13 +283,16 @@ const app = {
       this.savingThread = true;
     },
     saveThread() {
-      for (const message of this.selectedMessages) {
-        if (!message.savedThreads) {
-          message.savedThreads = [this.threadName];
-        } 
-        else {
-          message.savedThreads.push(this.threadName);
+      for (let m of this.selectedMessages) {
+        const message = {
+          type: 'Note',
+          content: "SavedThread",
+          threadName: this.threadName,
+          threadMessage: m,
+          context: ["sharon"]
         }
+
+        this.$gf.post(message);
       }
       this.selectedMessages = [];
       this.threadName = '';
@@ -333,19 +349,6 @@ const app = {
     resetAttachedFile() {
       document.getElementById("attached_file").value = "";
     },
-
-    // async getImageByMagnet(magnet) {
-    //   if (!(magnet in this.downloadedImages)) {
-    //     let blob
-    //     try {
-    //       blob = await this.$gf.media.fetch(magnet)
-    //     } catch {
-    //       this.downloadedImages[magnet] = false
-    //       return
-    //     }
-    //     this.downloadedImages[magnet] = URL.createObjectURL(blob)
-    //   }
-    // },
 
     onImageAttachment(event) {
       const file = event.target.files[0]

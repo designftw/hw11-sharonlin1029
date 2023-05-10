@@ -17,17 +17,171 @@
       Welcome, <name :actor="$gf.me"></name>!
     </h1>
 
-    {{ savedThreads }}
-    <details>
+    <!-- <details>
       <summary>
         <div>
           oof
         </div>
       </summary>
-    </details>
-    <div v-for="message of messages">
-      <!-- Message context: {{ message.context }} -->
-      Message: {{ message }}
+    </details> -->
+
+    <div v-for="(threadMessages, threadName) of savedThreadsMessages">
+      {{threadName}}
+      <div v-for="message in threadMessages">
+        <div class="message_template">
+          <div>
+            <input v-if="savingThread" type="checkbox" @change="toggleSelect(message); enableSaveThreadButton()">
+          </div>
+            <div v-if="!privateMessaging">
+              <div>
+                <pfp :actor="message.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
+              </div>
+              
+              <div>
+                <span class="message_author">
+                  <name :actor="message.actor" v-model="messageUserID"></name>
+                </span>
+    
+                <span class="username_wrap">
+                  @<span class="username">{{ actorsToUsernames[message.actor] }}</span>
+                </span>
+              </div>
+            </div>
+
+
+          <template v-if="privateMessaging">
+            <div class="private_title">
+              <div>
+                <div>
+                  <pfp :actor="message.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
+                </div>
+                
+                <div>
+                  <span class="message_author">
+                    <name :actor="message.actor" v-model="messageUserID"></name>
+                  </span>
+      
+                  <span class="username_wrap">
+                    @<span class="username">{{ actorsToUsernames[message.actor] }}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div style="font-size: 50px;">
+                ➡
+              </div>
+
+              <div>
+                <div>
+                  <pfp :actor="message.bto[0]" :downloadedpfps="downloadedProfilePictures"></pfp>
+                </div>
+                <span class="message_author">
+                  <name :actor="message.bto[0]"></name>
+                </span>
+                <span class="username_wrap">
+                  @<span class="username">{{ findUsername(message.bto[0]) }}</span>
+                </span>
+              </div>
+            </div>
+          </template>
+
+          <br>
+
+          <div class="message_content">
+            Message: {{ message.content }}
+          </div>
+
+          <!-- <div>
+            {{ message.id}}
+          </div> -->
+
+          <!-- NEW STUFF -->
+
+          <div v-if="message.attachment">
+            <template v-if="message.attachment.magnet in downloadedImages">
+              <img v-if="downloadedImages[message.attachment.magnet]"
+                :src="downloadedImages[message.attachment.magnet]">
+              <span v-else>
+                Image couldn't be downloaded!
+              </span>
+            </template>
+
+            <template v-else>
+              <img src="loader.svg" class="loader_icon">
+              Loading image...
+
+            </template>
+          </div>
+
+          <div>
+            Published at: {{ convertDate(message.published) }}
+          </div>
+          <div v-if="message.published != message.updated">
+            Last Edited at: {{ convertDate(message.updated) }}
+          </div>
+
+          <hr>
+
+          <div v-for="reply of messageReplies(message)" :key="reply.id">
+            <form v-if="editID==reply.id" @submit.prevent="saveEditMessage(reply)">
+              <div class="reply_template">
+                <input v-model="editText">
+                <input type="submit" value="Save" />
+              </div>
+              <br>
+            </form>
+
+            <div v-else>
+              <div class="reply_template">
+                <div>
+                  <pfp :actor="reply.actor" :downloadedpfps="downloadedProfilePictures"></pfp>
+                </div>
+                
+                <span class="message_author">
+                  <name :actor="reply.actor" v-model="replyUserID"></name>
+                </span>
+
+                <span class="username_wrap">
+                  @<span class="username">{{ actorsToUsernames[reply.actor] }}</span>
+                </span>
+
+                <div class="message_content">
+                  Reply: {{ reply.content }}
+                </div>
+
+                <div v-if="reply.attachment">
+                  <template v-if="reply.attachment.magnet in downloadedImages">
+                    <img v-if="downloadedImages[reply.attachment.magnet]"
+                      :src="downloadedImages[reply.attachment.magnet]">
+                    <span v-else>
+                      Image couldn't be downloaded!
+                    </span>
+                  </template>
+
+                  <template v-else>
+                    <img src="loader.svg" class="loader_icon">
+                    Loading image from
+
+                  </template>
+                </div>
+
+                <div>
+                  Published at: {{ convertDate(reply.published) }}
+                </div>
+                <div>
+                  Last Edited at: {{ convertDate(reply.updated) }}
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <hr>
+      </div>
+      <!-- {{ threadName }}
+      {{ threadMessages }} -->
+      <hr>
     </div>
     <div v-for="(thread, messages) in savedThreads">
 
