@@ -84,7 +84,11 @@
           <label for="channel">
             Channel you're chatting in:
           </label>
-          <input type="text" id="channel" v-model="channel" />
+          <input type="text" id="channel" v-model="channel" list="cityname"/>
+          <datalist id="cityname">
+            <option value="default"></option>
+            <option value="default-demo"></option>
+          </datalist>
         </p>
         <p v-else>
           <label for="recipient">
@@ -294,8 +298,8 @@
                 :recip="recipient" :channel="channel" :privatemessage="privateMessaging">
             </div>
 
-            <hr>
-
+            
+            <hr v-if="messageReplies(message).length > 0">
             <div v-for="reply of messageReplies(message)" :key="reply.id">
               <form v-if="editID==reply.id" @submit.prevent="saveEditMessage(reply)">
                 <div class="reply_template">

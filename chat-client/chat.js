@@ -92,6 +92,18 @@ const app = {
   },
 
   computed: {
+    savedThreadsDictionary() {
+      let threadDictionary = {};
+      for (let message of this.savedThreadsMessages) {
+        let threadName = message.threadName;
+        let threadMessage = message.threadMessage;
+        if (!(threadName in threadDictionary)) {
+          threadDictionary[threadName] = {};
+        }
+        threadDictionary[threadName][threadMessage.id] = message.threadMessage;
+      }
+      return threadDictionary;
+    },
     savedThreadsMessages() {
       let threadDictionary = {};
       let messages = this.messagesRaw
@@ -101,15 +113,7 @@ const app = {
           m.threadName &&
           m.threadMessage
         )
-      for (let message of messages) {
-        let threadName = message.threadName;
-        let threadMessage = message.threadMessage;
-        if (!(threadName in threadDictionary)) {
-          threadDictionary[threadName] = {};
-        }
-        threadDictionary[threadName][threadMessage.id] = message.threadMessage;
-      }
-      return threadDictionary;
+      return messages;
     },
 
     filteredMessages() {

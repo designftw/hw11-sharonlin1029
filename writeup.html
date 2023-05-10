@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Exercise 2</title>
+		<link rel="stylesheet" href="writeup.css" />
+	</head>
+	<body>
+		<h1>Checkpoint Writeup</h1>
+		<hr>
+		<section>
+      <article>
+        <h2>Final Design Features</h2>
+        <ul>
+          <li class="done"> Allows for users to select and save messages to a thread to access later</li>
+          <li class="not_done">Users will be able to change the thread title or delete the whole saved thread</li>
+          <li class="not_done">Users will be able to delete individual messages from a thread</li>
+          <li class="done">Filter chat messages by keyword(s) separated by commas</li>
+          <li class="not_done">Dropdown menu of all of the channels or users they have talked in/to</li>
+          <li class="not_done">Dropdown menu of all of the thread names they have saved</li>
+
+        </ul>
+      </article>
+
+      <article>
+        <h2>Changes from Figma Mockup</h2>
+        <ul>
+          <li>Overall layout of the chat from mobile messaging app to web chat app</li>
+          <li>Display of the replies right below a message rather than showing a preview of the message and then the reply</li>
+          <li>Added a filter by keyword functionality</li>
+          <li>Added safety measures for invalid inputs (submit buttons disabled)</li>
+          <li>Added messages for the user to understand the state of the app (error messages for invalid inputs, notifies that no messages in a channel, etc.)</li>
+          <li>Added efficiency features that don't make the users recall information (dropdown menus of previous states like users and channels they have talked to/in, which threads they have made, etc.)</li>
+        </ul>
+      </article>
+
+      <article>
+        <h2>Checkpoint Progress</h2>
+        <ul>
+          <li>Filtering by keywords for both channel and private messaging completed</li>
+          <li>Basic save threads functionality completed</li>
+        </ul>
+        <div>
+          Essentially, the two most complicated parts are to create and save threads and filtering the messages. I have completed these two, with the filtering being completely done and working as expected. The save threads function is working at a basic level (this took forever to figure out). Users are able to select messages, enter a thread title, and then save it. They are also then able to access all of their saved threads by clicking on the "saved threads" button. These saved threads are collapsible, which makes it easy to find the thread you want to access. However, users aren't able to change the thread title or delete threads or messages from threads yet. I don't anticipate this to be too difficult, since it will just be calling the delete message function with a particular message as the parameter. The dropdown menus will also just be extracting channels and "bto" properties from the raw messages array and displaying them. I will be working on these features for next week.
+        </div>
+      </article>
+    </section>
+	</body>
+</html>
