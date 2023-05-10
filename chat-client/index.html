@@ -165,7 +165,6 @@
 
       <br>
 
-      {{ selectedMessages}}
       <!-- Print out Messages -->
       <div v-for="message of filteredMessages" :key="message.id">
         <form v-if="editID==message.id" @submit.prevent="saveEditMessage(message)">
