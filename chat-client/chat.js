@@ -105,13 +105,13 @@ const app = {
       return threadDictionary;
     },
     savedThreadsMessages() {
-      let threadDictionary = {};
       let messages = this.messagesRaw
         .filter(m =>
           m.type &&
           m.type == 'Note' &&
           m.threadName &&
-          m.threadMessage
+          m.threadMessage &&
+          m.actor == this.$gf.me
         )
       return messages;
     },
