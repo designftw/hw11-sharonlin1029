@@ -265,6 +265,11 @@ img {
 .save_thread_bar {
     display: grid;
     grid-template-columns: 2fr 1fr;
+    position: sticky;
+    padding-top: 10px;
+    padding-bottom: 7px;
+    top: 0;
+    background-color: rgb(217, 236, 231);
 }
 
 #number_of_messages {
