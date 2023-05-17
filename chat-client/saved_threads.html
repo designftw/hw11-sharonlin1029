@@ -19,13 +19,17 @@
 
     <hr>
     <h2>
-      Your Saved Threads
+      Your Saved Messages Collections
     </h2>
+
+    <div v-if="Object.keys(savedThreadsDictionary).length == 0">
+      You don't have any saved messages right now!
+    </div>
 
     <div v-for="(threadMessages, threadName) of savedThreadsDictionary">
       <details>
         <summary class="summary">
-          <span class="thread">
+          <span class="thread" v-if="!editingThreadName">
             <span>
               <span>
 
@@ -36,8 +40,21 @@
             </span>
 
             <span class="thread_buttons">
-              <button style="margin-right: 5px">✏️</button>
-              <button>🗑️</button>
+              <button style="margin-right: 5px" @click="editThreadText = threadName; editingThreadName = true">✏️</button>
+              <button @click="deleteWholeThread(threadName)">🗑️</button>
+            </span>
+          </span>
+
+          <span class="thread" v-else>
+            <span>
+              <span>
+                <input v-model="editThreadText">
+              </span>
+            </span>
+
+            <span class="thread_buttons">
+              <button @click="saveThreadName(threadName)" style="margin-right: 5px">✔️</button>
+              <button @click="editingThreadName = false">❌</button>
             </span>
           </span>
           
@@ -137,7 +154,7 @@
               <div v-if="message.published != message.updated">
                 Last Edited at: {{ convertDate(message.updated) }}
               </div>
-              <button class="delete_message">Delete Message from Thread</button>
+              <button class="delete_message" @click="deleteMessageFromThread(threadName, message)">Delete Message from Collection</button>
     
               <hr v-if="messageReplies(message).length > 0">
               <div v-for="reply of messageReplies(message)" :key="reply.id">

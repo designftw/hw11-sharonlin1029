@@ -60,6 +60,9 @@ const app = {
       threadName: '',
       // FILTERING
       filter: '',
+      editingThreadName: false,
+      editThreadText: '',
+      newThreadName: '',
     }
   },
 
@@ -92,6 +95,20 @@ const app = {
   },
 
   computed: {
+    savedThreadNames() {
+      return Object.keys(this.savedThreadsDictionary);
+    },
+    usersMessaged() {
+      let users = new Set();
+      for (let message of this.messagesRaw) {
+        if (message.bto && message.bto.length == 1) {
+          if (this.actorsToUsernames[message.bto[0]] != null) {
+          users.add(this.actorsToUsernames[message.bto[0]]);
+          }
+        }
+      }
+      return users;
+    },
     savedThreadsDictionary() {
       let threadDictionary = {};
       for (let message of this.savedThreadsMessages) {
@@ -100,7 +117,7 @@ const app = {
         if (!(threadName in threadDictionary)) {
           threadDictionary[threadName] = {};
         }
-        threadDictionary[threadName][threadMessage.id] = message.threadMessage;
+        threadDictionary[threadName][message.id] = threadMessage;
       }
       return threadDictionary;
     },
@@ -263,6 +280,35 @@ const app = {
   },
 
   methods: {
+    changeThreadName(oldThreadName) {
+      let messages = this.savedThreadsDictionary[oldThreadName];
+      for (let threadMessageID in messages) {
+        let threadMessage = this.getMessageFromMessageID(threadMessageID);
+        threadMessage.threadName = this.editThreadText;
+      }
+    },
+    deleteMessageFromThread(threadName, message) {
+      for (let threadMessageID in this.savedThreadsDictionary[threadName]) {
+        if (this.savedThreadsDictionary[threadName][threadMessageID] == message) {
+          delete this.savedThreadsDictionary[threadName][threadMessageID];
+          this.removeMessage(this.getMessageFromMessageID(threadMessageID));
+          break;
+        }
+      }
+    },
+    deleteWholeThread(threadName) {
+      for (let threadMessageID in this.savedThreadsDictionary[threadName]) {
+        delete this.savedThreadsDictionary[threadName];
+        this.removeMessage(this.getMessageFromMessageID(threadMessageID));
+      }
+    },
+    getMessageFromMessageID(messageID) {
+      for (let message of this.messagesRaw) {
+        if (message.id == messageID) {
+          return message;
+        }
+      }
+    },
     enableSaveThreadButton() {
       if (this.selectedMessages.length > 0 && this.threadName.length > 0) {
         document.getElementById("save_thread_button").disabled = false;
@@ -622,26 +668,6 @@ const Pfp = {
           magnet: magnetLink
         }
       })
-      // if (this.profile) {
-      //   this.profile.icon = {
-      //     type: 'Image',
-      //     magnet: magnetLink
-      //   }
-      //   // this.myProfilePictureURL = URL.createObjectURL(this.file);
-      //   this.file = null;
-      // }
-
-      // else {
-      //   this.$gf.post({
-      //     type: 'Profile',
-      //     icon: {
-      //       type: 'Image',
-      //       magnet: magnetLink
-      //     }
-      //   })
-      //   // this.myProfilePictureURL = URL.createObjectURL(this.file);
-      //   this.file = null;
-      // }
       this.editing = false
     },
   },
@@ -713,7 +739,8 @@ const Read = {
     readUsers() {
       try {
         const userList = [...new Set(this.reads.map(r => r.actor))].map(actor => this.actorstousernames[actor]);
-        return userList;
+        const users = userList.filter(Boolean).join(", ");
+        return users;
       }
       catch {
         return "No one has read this message yet!";

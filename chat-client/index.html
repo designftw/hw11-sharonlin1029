@@ -84,18 +84,17 @@
           <label for="channel">
             Channel you're chatting in:
           </label>
-          <input type="text" id="channel" v-model="channel" list="cityname"/>
-          <datalist id="cityname">
-            <option value="default"></option>
-            <option value="default-demo"></option>
-          </datalist>
+          <input type="text" id="channel" v-model="channel"/>
         </p>
         <p v-else>
           <label for="recipient">
             User to chat with:
           </label>
 
-          <input type="text" id="recipient" v-model="recipientUsername" @input="event => searchUser()" />
+          <input type="text" id="recipient" v-model="recipientUsername" @input="event => searchUser()" list="chattingusers"/>
+          <datalist id="chattingusers">
+            <option v-for="user in usersMessaged" :value="user"></option>
+          </datalist>
         </p>
       </div>
 
@@ -137,13 +136,17 @@
 
       <div class="save_thread_bar">
         <div v-if="!savingThread">
-          <button @click="startThread()" class="start_thread_button">+ Create Saved Thread </button>
-          <button @click="accessSavedThreads()" class="access_saved_button">Saved Threads</button>
+          <button @click="startThread()" class="start_thread_button"> Save Messages </button>
+          <button @click="accessSavedThreads()" class="access_saved_button">Saved Collections</button>
         </div>
 
         <div v-if="savingThread">
-          <input type="text" v-model="threadName" id="thread_name" placeholder="Thread Name" @input="enableSaveThreadButton()">
-          <button @click="saveThread()" id="save_thread_button" disabled>Save Thread</button>
+          <input type="text" v-model="threadName" id="thread_name" placeholder="Thread Name" @input="enableSaveThreadButton()" list="threadnames">
+
+          <datalist id="threadnames">
+            <option v-for="threadName of savedThreadNames" :value="threadName"></option>
+          </datalist>
+          <button @click="saveThread()" id="save_thread_button" disabled>Save</button>
           <button @click="cancelThread()">Cancel</button>
           <div id="thread_error"></div>
           <div v-if="selectedMessages.length == 1"> {{ selectedMessages.length }} message selected</div>
