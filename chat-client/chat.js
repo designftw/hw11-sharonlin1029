@@ -286,6 +286,7 @@ const app = {
         let threadMessage = this.getMessageFromMessageID(threadMessageID);
         threadMessage.threadName = this.editThreadText;
       }
+      this.editingThreadName = false;
     },
     deleteMessageFromThread(threadName, message) {
       for (let threadMessageID in this.savedThreadsDictionary[threadName]) {
